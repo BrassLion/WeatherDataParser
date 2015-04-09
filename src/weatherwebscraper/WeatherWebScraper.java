@@ -100,7 +100,7 @@ public class WeatherWebScraper {
 
             //write column titles
             writer.append(String.format(
-                    "Station Name, Latitude, Longitude%s, UNIX Time, Wind Direction, Wind Speed Lo (%s), Wind Speed Hi (%s), Gust Speed (%s)", 
+                    "Station Name, Latitude, Longitude%s,\t UNIX Time, Wind Direction, Wind Speed Lo (%s), Wind Speed Hi (%s), Gust Speed (%s)", 
                     useGoogleLocationData ? ", number of locations returned by Google, distance between coarse and Google coordinates (m)" : "",
                     dataUnits, 
                     dataUnits, 
@@ -137,13 +137,14 @@ public class WeatherWebScraper {
                 }
 
                 Collections.sort(collection.points);
+                writer.append("\t");
                 
                 for (WindDataPoint point : collection.points) {
                     writer.append(point.time + ",");
                     writer.append(point.direction + ",");
                     writer.append(point.speedLo + ",");
                     writer.append(point.speedHi + ",");
-                    writer.append(point.gust + ",");
+                    writer.append(point.gust + "\t");
                 }
                 writer.newLine();
             }
