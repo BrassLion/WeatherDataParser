@@ -30,6 +30,8 @@ public class WeatherWebScraper {
     static final String geoDataURLBase = "http://www.weatheronline.co.uk/weather/maps/current?LANG=en&CEL=C&SI=mph&MAPS=over&CONT=ukuk&LAND=UK&REGION=0003&WMO=%s&UP=0&R=310&LEVEL=180&NOREGION=0";
     static final String dataUnits = "mph";
     static final boolean useGoogleLocationData = true;
+    //use Google geolocation coordinates if returned results are within this distance from target.
+    static final double distanceThreshold = 100000;
 
     static final Pattern pLong = Pattern.compile("Longitude,(\\w.*?),");
     static final Pattern pLat = Pattern.compile("Latitude,(\\w.*?),");
@@ -120,7 +122,7 @@ public class WeatherWebScraper {
                     String trimmedOwner = collection.owner.substring(0, collection.owner.lastIndexOf("(") - 1);
                     
                     //get fine geo data from Google
-                    double[] latLong = GoogleMapsQuery.getClosestLatLong(trimmedOwner, geoData.get(collection.owner).get(0).toString(), geoData.get(collection.owner).get(1).toString());
+                    double[] latLong = GoogleMapsQuery.getClosestLatLong(trimmedOwner, geoData.get(collection.owner).get(0).toString(), geoData.get(collection.owner).get(1).toString(), distanceThreshold);
                     
                     if(latLong != null) {
                         writer.append(latLong[0] + ",");
@@ -204,7 +206,7 @@ public class WeatherWebScraper {
                 String gust = null;
 
                 if (dataPiece.length < 4) {
-                    System.out.println("Data Missing!");
+                    System.out.println("Data Missing from " + this.getName() + "!");
                     continue;
                 }
 

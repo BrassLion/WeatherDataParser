@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.vecmath.Point2d;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -19,6 +20,9 @@ import org.json.simple.JSONValue;
  * @author Craig, Sam
  */
 public class GoogleMapsQuery {
+    
+    public final static Point2d boundingBoxSWCorner = new Point2d(49.69016250118635, -11.646131347656251);
+    public final static Point2d boundingBoxNECorner = new Point2d(63.049187392023704, 2.9025200195312664);
 
     /**
      * @param args the command line arguments
@@ -39,15 +43,24 @@ public class GoogleMapsQuery {
      * @param address A String of the name of the place supplied to the Google search.
      * @param targetLat Latitude of the target coordinate in decimal notation
      * @param targetLng Longitude of the target coordinate in decimal notation
+     * @param distanceThreshold if distance between target coordinate and closest Google coordinate is less than threshold, return Google coordinate. Else return target coordinate.
      * @return an array containing [closest coordinate latitude, closest coordinate longitude, distance between target and closest coordinate, number of locations returned by Google].
      */
-    public static double[] getClosestLatLong(String address, double targetLat, double targetLng) {
+    public static double[] getClosestLatLong(String address, double targetLat, double targetLng, double distanceThreshold) {
 
         System.out.println("\tGetting Google Location Data for " + address + "...");
         
         URL url = null;
         try {
-            url = new URL("http://maps.googleapis.com/maps/api/geocode/json?address=" + address.replaceAll("[ ']", "%20") + "&region=uk&sensor=false");
+            String bounds = String.format( "&bounds=%f,%f|%f,%f",
+                    boundingBoxSWCorner.x,
+                    boundingBoxSWCorner.y,
+                    boundingBoxNECorner.x,
+                    boundingBoxNECorner.y
+            );
+            
+            url = new URL( "http://maps.googleapis.com/maps/api/geocode/json?address=" + address.replaceAll("[ ']", "%20") + bounds + "&sensor=false" );
+            
         } catch (MalformedURLException ex) {
             Logger.getLogger(GoogleMapsQuery.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -96,8 +109,14 @@ public class GoogleMapsQuery {
             System.out.println("Slight Pause");
         }
 
-        System.out.println("\t\tSearch returned " + jResults.size() + " results. Closest coordinate was " + closestDist + "m from target coordinate");
-        return new double[]{closestLat, closestLng, closestDist, jResults.size()};
+        if(closestDist < distanceThreshold) {
+            System.out.println("\t\tSearch returned " + jResults.size() + " results. Closest coordinate was " + closestDist + "m from target coordinate");
+            return new double[]{closestLat, closestLng, closestDist, jResults.size()};
+        }
+        else {
+            System.out.println("\t\tSearch returned no coordinates within " + distanceThreshold + "m threshold, returning target coordinates.");
+            return new double[]{targetLat, targetLng, 0, 0};
+        }
     }
     
     /**
@@ -106,13 +125,14 @@ public class GoogleMapsQuery {
      * @param address A String of the name of the place supplied to the Google search.
      * @param targetLat Latitude of the target coordinate in DMS notation
      * @param targetLng Longitude of the target coordinate in DMS notation
+     * @param distanceThreshold if distance between target coordinate and closest Google coordinate is less than threshold, return Google coordinate. Else return target coordinate.
      * @return an array containing [closest coordinate latitude, closest coordinate longitude, distance between target and closest coordinate, number of locations returned by Google].
      */
-    public static double[] getClosestLatLong(String address, String targetLat, String targetLng) {
+    public static double[] getClosestLatLong(String address, String targetLat, String targetLng, double distanceThreshold) {
         double latDecimal = latLngDMSToDeg( targetLat );
         double lngDecimal = latLngDMSToDeg( targetLng );
         
-        return getClosestLatLong( address, latDecimal, lngDecimal );
+        return getClosestLatLong( address, latDecimal, lngDecimal, distanceThreshold );
     }
     
     /**
