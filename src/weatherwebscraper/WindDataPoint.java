@@ -27,8 +27,8 @@ class WindDataPoint implements Comparable<WindDataPoint> {
         String[] velArray = velRange.replaceAll("[a-zA-z]", "").split("-");
         
         if(velArray.length >= 2) {
-            this.speedLo = velArray[0];
-            this.speedHi = velArray[1];
+            this.speedLo = velArray[0].trim();
+            this.speedHi = velArray[1].trim();
         }
         else {
             this.speedLo = null;
@@ -40,21 +40,21 @@ class WindDataPoint implements Comparable<WindDataPoint> {
 
         switch (direction) {
             case "N":
-                return "0";
-            case "NE":
-                return "45";
-            case "E":
-                return "90";
-            case "SE":
-                return "135";
-            case "S":
                 return "180";
-            case "SW":
+            case "NE":
                 return "225";
-            case "W":
+            case "E":
                 return "270";
-            case "NW":
+            case "SE":
                 return "315";
+            case "S":
+                return "0";
+            case "SW":
+                return "45";
+            case "W":
+                return "90";
+            case "NW":
+                return "135";
             default:
                 return direction;
         }
