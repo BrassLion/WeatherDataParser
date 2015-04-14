@@ -79,7 +79,7 @@ public class GoogleMapsQuery {
         
         if(jResults.size() == 0) {
             System.out.println("\t\tGoogle location search returned error code:\n\t\t" + json.get("status").toString());
-            return null;
+            return new double[]{targetLat, targetLng, 0, 0};
         }
         
         double closestLat = 0;
