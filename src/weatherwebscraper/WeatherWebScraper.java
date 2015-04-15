@@ -102,7 +102,7 @@ public class WeatherWebScraper {
 
             //write column titles
             writer.append(String.format(
-                    "Station Name, Latitude, Longitude%s,\t UNIX Time, Wind Direction, Wind Speed Lo (%s), Wind Speed Hi (%s), Gust Speed (%s)", 
+                    "Station Name, Latitude, Longitude%s, Speed Units,\t UNIX Time, Wind Direction, Wind Speed Lo (%s), Wind Speed Hi (%s), Gust Speed (%s)", 
                     useGoogleLocationData ? ", number of locations returned by Google, distance between coarse and Google coordinates (m)" : "",
                     dataUnits, 
                     dataUnits, 
@@ -131,12 +131,14 @@ public class WeatherWebScraper {
                         writer.append(latLong[2] + ",");
                     }
                     else {
-                        writer.append(",,,,");
+                        writer.append(",,,,,");
                     }
                 } else {
                     writer.append(geoData.get(collection.owner).get(0) + ",");
                     writer.append(geoData.get(collection.owner).get(1) + ",");
                 }
+                
+                writer.append( dataUnits );
 
                 Collections.sort(collection.points);
                 writer.append("\t");
